@@ -12,7 +12,10 @@
         <Label Content="Please enter description of the script" />
 
         <!-- Multiline TextBox -->
-        <TextBox Height="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+        <TextBox x:Name="ScriptDescriptionTextBox" Height="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+
+        <!-- Generate Script -->
+        <Button Content="Generate Script" Margin="0,10,0,0" Click="OnGenerateScriptClick" />
 
         <!-- Placeholder for AvalonEdit (Collapsible) -->
         <Expander Header="Script Editor" IsExpanded="False">
@@ -23,7 +26,7 @@
         <Label Content="Script Status: Not ready" Name="ScriptStatusLabel" />
 
         <!-- Execute Button -->
-        <Button Content="Execute" Margin="0,10,0,0" />
+        <Button Content="Execute Script" Margin="0,10,0,0" />
     </StackPanel>
 
 </UserControl>

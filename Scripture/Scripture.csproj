@@ -17,6 +17,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ScriptureCore\ScriptureCore.csproj" />
     <ProjectReference Include="..\ScriptureUI\ScriptureUI.csproj" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -5,9 +5,11 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scripture", "Scripture\Scripture.csproj", "{5B476D04-2EF5-4495-B38A-80E6103DA77F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptureUI", "ScriptureUI\ScriptureUI.csproj", "{7DABDA32-5907-4828-BFF2-070811407807}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptureUI", "ScriptureUI\ScriptureUI.csproj", "{7DABDA32-5907-4828-BFF2-070811407807}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptureHarnessApp", "ScriptureHarnessApp\ScriptureHarnessApp.csproj", "{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScriptureHarnessApp", "ScriptureHarnessApp\ScriptureHarnessApp.csproj", "{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptureCore", "ScriptureCore\ScriptureCore.csproj", "{889C6936-11C4-41E3-A8B0-7E15C932F34C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,14 @@ Global
 		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Release|x64.ActiveCfg = Release|Any CPU
 		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Release|x64.Build.0 = Release|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Debug|x64.Build.0 = Debug|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Release|x64.ActiveCfg = Release|Any CPU
+		{889C6936-11C4-41E3-A8B0-7E15C932F34C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,7 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using ScriptureCore;
 using ScriptureUI;
 using System.Runtime.Versioning;
 using System.Windows.Forms.Integration;
@@ -15,12 +17,20 @@ namespace Scripture
         {
             System.Diagnostics.Debugger.Launch();
 
+            var serviceCollection = new ServiceCollection();
+            ServiceRegistration.RegisterServices(serviceCollection);
+
+            // Build the service provider and set it in ServiceLocator
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            ServiceLocator.SetServiceProvider(serviceProvider);
+
+            // build the palette
             _paletteSet = new PaletteSet("Scripture Panel");
-            _paletteSet.Size = new System.Drawing.Size(300, 500); // Set panel size
+            _paletteSet.Size = new System.Drawing.Size(300, 500);
             _paletteSet.Visible = true;
 
             // Create an instance of the WPF UserControl
-            var wpfControl = new ScriptureControl(); // Your WPF UserControl
+            var wpfControl = new ScriptureControl();
 
             // Create an ElementHost to host the WPF control
             ElementHost elementHost = new ElementHost
