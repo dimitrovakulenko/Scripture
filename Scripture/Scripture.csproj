@@ -19,4 +19,13 @@
   <ItemGroup>
     <ProjectReference Include="..\ScriptureUI\ScriptureUI.csproj" />
   </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <PropertyGroup>
+      <ScriptureUIBinDir>$(SolutionDir)ScriptureUI\bin\$(Configuration)\net8.0-windows\</ScriptureUIBinDir>
+      <NuGetPackagesDir>$(UserProfile)\.nuget\packages\avalonedit\6.3.0.90\lib\net7.0-windows7.0\</NuGetPackagesDir>
+      <OutputDir>$(TargetDir)</OutputDir>
+    </PropertyGroup>
+    <Exec Command="xcopy /Y &quot;$(ScriptureUIBinDir)ScriptureUI.dll&quot; &quot;$(OutputDir)&quot;" />
+    <Exec Command="xcopy /Y &quot;$(NuGetPackagesDir)ICSharpCode.AvalonEdit.dll&quot; &quot;$(OutputDir)&quot;" />
+  </Target>
 </Project>

@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scripture", "Scripture\Scri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptureUI", "ScriptureUI\ScriptureUI.csproj", "{7DABDA32-5907-4828-BFF2-070811407807}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptureHarnessApp", "ScriptureHarnessApp\ScriptureHarnessApp.csproj", "{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{7DABDA32-5907-4828-BFF2-070811407807}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7DABDA32-5907-4828-BFF2-070811407807}.Release|x64.ActiveCfg = Release|Any CPU
 		{7DABDA32-5907-4828-BFF2-070811407807}.Release|x64.Build.0 = Release|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Debug|x64.Build.0 = Debug|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Release|x64.ActiveCfg = Release|Any CPU
+		{A448526D-7CB7-4B2A-8232-EBE6DC1397B2}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

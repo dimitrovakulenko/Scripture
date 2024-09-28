@@ -1,16 +1,20 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
 using ScriptureUI;
+using System.Runtime.Versioning;
 using System.Windows.Forms.Integration;
 
 namespace Scripture
 {
+    [SupportedOSPlatform("windows")]
     public class ScriptureExtension : IExtensionApplication
     {
-        private PaletteSet _paletteSet;
+        private PaletteSet? _paletteSet;
 
         public void Initialize()
         {
+            System.Diagnostics.Debugger.Launch();
+
             _paletteSet = new PaletteSet("Scripture Panel");
             _paletteSet.Size = new System.Drawing.Size(300, 500); // Set panel size
             _paletteSet.Visible = true;
