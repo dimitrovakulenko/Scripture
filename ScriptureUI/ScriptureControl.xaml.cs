@@ -89,7 +89,7 @@ namespace ScriptureUI
                 : $"Compilation failed : {string.Join(';', res.Errors)}";
         }
 
-        private async void OnExecuteScriptClick(object sender, System.Windows.RoutedEventArgs e)
+        private void OnExecuteScriptClick(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace ScriptureUI
             }
         }
 
-        private string ExtractCommandName(string script)
+        private string? ExtractCommandName(string script)
         {
             // Regular expression to find the command name in [CommandMethod("CommandName")]
             var match = Regex.Match(script, @"\[CommandMethod\(""([^""]+)""\)\]");

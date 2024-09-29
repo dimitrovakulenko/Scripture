@@ -1,11 +1,13 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Configuration;
+using OpenAI;
 using OpenAI.Chat;
+using System.ClientModel;
 
 namespace ScriptureCore
 {
-    internal class OpenAIService: ILLMServices
+    internal class OpenAIService : ILLMServices
     {
         private readonly ChatClient _initialScriptClient;
 
@@ -13,24 +15,31 @@ namespace ScriptureCore
         {
             string? apiKey = configuration["InitialScriptModel:ApiKey"];
             string? endpoint = configuration["InitialScriptModel:Endpoint"];
-            string? deploymentName = configuration["InitialScriptModel:DeploymentName"];
+            string? modelName = configuration["InitialScriptModel:ModelName"];
 
             if (string.IsNullOrEmpty(apiKey))
             {
                 throw new ArgumentNullException(nameof(apiKey), "API key must not be null or empty.");
             }
+
+            // Check if the endpoint is specified to determine if it's Azure or OpenAI
             if (string.IsNullOrEmpty(endpoint))
             {
-                throw new ArgumentNullException(nameof(endpoint), "Endpoint must not be null or empty.");
+                // OpenAI directly
+                var openAiClient = new OpenAIClient(apiKey);
+                _initialScriptClient = openAiClient.GetChatClient(modelName);
             }
-            if (string.IsNullOrEmpty(deploymentName))
+            else
             {
-                throw new ArgumentNullException(nameof(deploymentName), "Deployment name must not be null or empty.");
-            }
+                // Azure OpenAI
+                if (string.IsNullOrEmpty(modelName))
+                {
+                    throw new ArgumentNullException(nameof(modelName), "Deployment name must not be null or empty for Azure.");
+                }
 
-            _initialScriptClient = new AzureOpenAIClient(
-                new Uri(endpoint), 
-                new AzureKeyCredential(apiKey)).GetChatClient(deploymentName);
+                var azureClient = new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(apiKey));
+                _initialScriptClient = azureClient.GetChatClient(modelName);
+            }
         }
 
         public async Task<string> GenerateInitialScriptAsync(string prompt)
@@ -79,7 +88,6 @@ namespace ScriptureCore
             4. Return only the C# code, without any extra explanations or comments.
 
             The user's request is: ";
-        }       
-
+        }
     }
 }
