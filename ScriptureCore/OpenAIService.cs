@@ -2,6 +2,7 @@
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Chat;
+using System;
 
 namespace ScriptureCore
 {
@@ -33,26 +34,41 @@ namespace ScriptureCore
                 new AzureKeyCredential(apiKey)).GetChatClient(deploymentName);
         }
 
-        public async Task<string> GenerateScriptAsync(string prompt)
+        public async Task<string> GenerateInitialScriptAsync(string prompt)
         {
             ChatCompletionOptions options = new()
             {
                 MaxOutputTokenCount = 1024,
                 Temperature = 0.3f,
-                //StopSequences = new[] { "###" }
             };
 
             var messages = new ChatMessage[]
             {
-                new SystemChatMessage(GenerateSystemMessage()),
+                new SystemChatMessage(GenerateInitialScriptSystemMessage()),
                 new UserChatMessage(prompt),
             };
 
             var completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
-            return string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
+            var completeAnswer = string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
+            return RemoveCodeFence(completeAnswer);
         }
 
-        private string GenerateSystemMessage()
+        public static string RemoveCodeFence(string code)
+        {
+            if (code.StartsWith("```csharp", StringComparison.OrdinalIgnoreCase))
+            {
+                code = code.Substring(9).TrimStart(); // Remove ```csharp and any extra whitespace/new lines
+            }
+
+            if (code.EndsWith("```", StringComparison.OrdinalIgnoreCase))
+            {
+                code = code.Substring(0, code.Length - 3).TrimEnd(); // Remove ``` and any extra whitespace/new lines
+            }
+
+            return code;
+        }
+
+        private string GenerateInitialScriptSystemMessage()
         {
             return @"You are an expert C# developer specializing in AutoCAD ObjectARX.NET API.
             Your task is to generate a C# function to solve the user's problem based on the given description.

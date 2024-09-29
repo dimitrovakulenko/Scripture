@@ -30,10 +30,14 @@ namespace ScriptureUI
                 var openAIService = ServiceLocator.GetService<OpenAIService>();
 
                 // Generate the script using the user's prompt
-                string generatedScript = await openAIService.GenerateScriptAsync(userPrompt);
+                string generatedScript = await openAIService.GenerateInitialScriptAsync(userPrompt);
 
                 // Display the generated script in the output TextBox
                 ScriptEditor.Text = generatedScript;
+
+                var res = RuntimeCompiler.TestCompile(generatedScript);
+
+                ScriptStatusLabel.Content = res.Success ? "Successfully compiled" : "Compilation failed";
             }
             catch (Exception ex)
             {
