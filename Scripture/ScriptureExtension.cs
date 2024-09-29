@@ -26,7 +26,7 @@ namespace Scripture
 
             // build the palette
             _paletteSet = new PaletteSet("Scripture Panel");
-            _paletteSet.Size = new System.Drawing.Size(300, 500);
+            _paletteSet.Size = new System.Drawing.Size(600, 800);
             _paletteSet.Visible = true;
 
             // Create an instance of the WPF UserControl
