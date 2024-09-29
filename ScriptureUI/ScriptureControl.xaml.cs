@@ -1,5 +1,6 @@
 ﻿using ScriptureCore;
 using System.CodeDom.Compiler;
+using System.Text.RegularExpressions;
 using System.Windows.Controls;
 
 namespace ScriptureUI
@@ -12,6 +13,9 @@ namespace ScriptureUI
         public ScriptureControl()
         {
             InitializeComponent();
+
+            ScriptEditor.Options.IndentationSize = 4;
+            ScriptEditor.Options.ConvertTabsToSpaces = false;
         }
 
         private async void OnGenerateScriptClick(object sender, System.Windows.RoutedEventArgs e)
@@ -68,8 +72,11 @@ namespace ScriptureUI
                 MainProgressBar.Visibility = System.Windows.Visibility.Visible;
             ProgressStatusLabel.Text = status;
             MainProgressBar.Value = progressValue;
-            if(MainProgressBar.Value == 100)
+            if (MainProgressBar.Value == 100)
+            {
                 MainProgressBar.Visibility = System.Windows.Visibility.Collapsed;
+                MainProgressBar.Value = 0;
+            }
         }
 
         private void OnRecompileScriptClick(object sender, System.Windows.RoutedEventArgs e)
@@ -81,5 +88,46 @@ namespace ScriptureUI
                 ? "Successfully compiled"
                 : $"Compilation failed : {string.Join(';', res.Errors)}";
         }
+
+        private async void OnExecuteScriptClick(object sender, System.Windows.RoutedEventArgs e)
+        {
+            try
+            {
+                string script = ScriptEditor.Text;
+                var commandName = ExtractCommandName(script);
+                if (commandName is null)
+                    throw new Exception("Command name not found");
+
+                var compiler = ServiceLocator.GetService<ICompiler>();
+                var (success, errors, dllPath) = compiler.CompileToTemporaryFile(script);
+
+                if (!success)
+                {
+                    ScriptStatusLabel.Content = "Compilation failed";
+                    ScriptEditor.Text = string.Join(Environment.NewLine, errors);
+                    return;
+                }
+
+                var scriptExecutor = ServiceLocator.GetService<IScriptExecutor>();
+                scriptExecutor.Execute(dllPath, commandName);
+
+                ScriptStatusLabel.Content = "Script executed successfully";
+            }
+            catch (Exception ex)
+            {
+                ScriptStatusLabel.Content = "Execution failed";
+                ScriptEditor.Text = ex.ToString();
+            }
+        }
+
+        private string ExtractCommandName(string script)
+        {
+            // Regular expression to find the command name in [CommandMethod("CommandName")]
+            var match = Regex.Match(script, @"\[CommandMethod\(""([^""]+)""\)\]");
+
+            // If a match is found, return the command name, otherwise return null
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
     }
 }

@@ -23,7 +23,7 @@ namespace ScriptureCore.Tests
 
             // register services
             var serviceCollection = new ServiceCollection();
-            ServiceRegistration.RegisterServices(serviceCollection);
+            ServiceRegistration.RegisterServices(serviceCollection, null);
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
             ServiceLocator.SetServiceProvider(serviceProvider);

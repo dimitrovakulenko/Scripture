@@ -24,7 +24,7 @@ namespace ScriptureHarnessApp
             }
 
             var serviceCollection = new ServiceCollection();
-            ServiceRegistration.RegisterServices(serviceCollection);
+            ServiceRegistration.RegisterServices(serviceCollection, null);
 
             // Build the service provider and set it in ServiceLocator
             var serviceProvider = serviceCollection.BuildServiceProvider();

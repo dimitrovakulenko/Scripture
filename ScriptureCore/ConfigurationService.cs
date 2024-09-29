@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System.Reflection;
 
 namespace ScriptureCore
 {
@@ -8,8 +9,13 @@ namespace ScriptureCore
 
         public ConfigurationService()
         {
+            var pluginLocation = Path.GetDirectoryName(
+                Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(pluginLocation))
+                throw new Exception("Executing dll doesn't exist?");
+
             _configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(pluginLocation)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
         }

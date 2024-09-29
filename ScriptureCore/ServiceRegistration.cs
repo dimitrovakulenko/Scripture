@@ -5,7 +5,7 @@ namespace ScriptureCore
 {
     public static class ServiceRegistration
     {
-        public static void RegisterServices(IServiceCollection services)
+        public static void RegisterServices(IServiceCollection services, IScriptExecutor scriptExecutor)
         {
             // Register ConfigurationService as a singleton
             services.AddSingleton<ConfigurationService>();
@@ -18,6 +18,11 @@ namespace ScriptureCore
             });
 
             services.AddSingleton<ICompiler, RuntimeCompiler>();
+
+            services.AddSingleton<IScriptExecutor>(provide =>
+            {
+                return scriptExecutor;
+            });
         }
     }
 }

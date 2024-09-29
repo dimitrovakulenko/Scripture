@@ -18,7 +18,7 @@ namespace Scripture
             System.Diagnostics.Debugger.Launch();
 
             var serviceCollection = new ServiceCollection();
-            ServiceRegistration.RegisterServices(serviceCollection);
+            ServiceRegistration.RegisterServices(serviceCollection, new ScriptExecutor());
 
             // Build the service provider and set it in ServiceLocator
             var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -26,8 +26,10 @@ namespace Scripture
 
             // build the palette
             _paletteSet = new PaletteSet("Scripture Panel");
-            _paletteSet.Size = new System.Drawing.Size(600, 800);
             _paletteSet.Visible = true;
+            _paletteSet.Size = new System.Drawing.Size(600, 600);
+            _paletteSet.DockEnabled = DockSides.Left;
+            _paletteSet.Dock = DockSides.Left;
 
             // Create an instance of the WPF UserControl
             var wpfControl = new ScriptureControl();
