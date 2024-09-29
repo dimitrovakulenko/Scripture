@@ -8,6 +8,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel Margin="10">
+        <!-- Progress Bar and Status Text -->
+        <Grid>
+            <ProgressBar x:Name="MainProgressBar" Height="20" Minimum="0" Maximum="100" Visibility="Collapsed" />
+            <TextBlock x:Name="ProgressStatusLabel" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+        </Grid>
+        
         <!-- Label -->
         <Label Content="Please enter description of the script" />
 
@@ -15,7 +21,7 @@
         <TextBox x:Name="ScriptDescriptionTextBox" Height="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
 
         <!-- Generate Script -->
-        <Button Content="Generate Script" Margin="0,10,0,0" Click="OnGenerateScriptClick" />
+        <Button x:Name="GenerateScriptButton" Content="Generate Script" Margin="0,10,0,0" Click="OnGenerateScriptClick" />
 
         <!-- Placeholder for AvalonEdit (Collapsible) -->
         <Expander Header="Script Editor" IsExpanded="False">
@@ -25,6 +31,9 @@
         <!-- Status Label -->
         <Label Content="Script Status: Not ready" Name="ScriptStatusLabel" />
 
+        <!-- Recompile Button -->
+        <Button Content="Recompile Script" Margin="0,10,0,0" Click="OnRecompileScriptClick" />
+        
         <!-- Execute Button -->
         <Button Content="Execute Script" Margin="0,10,0,0" />
     </StackPanel>
