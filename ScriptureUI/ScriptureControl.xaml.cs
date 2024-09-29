@@ -1,4 +1,5 @@
 ﻿using ScriptureCore;
+using System.CodeDom.Compiler;
 using System.Windows.Controls;
 
 namespace ScriptureUI
@@ -15,27 +16,25 @@ namespace ScriptureUI
 
         private async void OnGenerateScriptClick(object sender, System.Windows.RoutedEventArgs e)
         {
-            // Get user prompt from the input TextBox
             string userPrompt = ScriptDescriptionTextBox.Text;
 
             if (string.IsNullOrWhiteSpace(userPrompt))
             {
-                //MessageBox.Show("Please enter a description for the script.", "Input Error");
                 return;
             }
 
             try
             {
-                // Get the OpenAIService instance from the ServiceLocator
-                var openAIService = ServiceLocator.GetService<OpenAIService>();
+                var lLMServices = ServiceLocator.GetService<ILLMServices>();
+                var compiler = ServiceLocator.GetService<ICompiler>();
 
                 // Generate the script using the user's prompt
-                string generatedScript = await openAIService.GenerateInitialScriptAsync(userPrompt);
+                string generatedScript = await lLMServices.GenerateInitialScriptAsync(userPrompt);
 
                 // Display the generated script in the output TextBox
                 ScriptEditor.Text = generatedScript;
 
-                var res = RuntimeCompiler.TestCompile(generatedScript);
+                var res = compiler.TestCompile(generatedScript);
 
                 ScriptStatusLabel.Content = res.Success ? "Successfully compiled" : "Compilation failed";
             }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace ScriptureCore
 {
@@ -10,11 +11,13 @@ namespace ScriptureCore
             services.AddSingleton<ConfigurationService>();
 
             // Register OpenAIService as a singleton
-            services.AddSingleton<OpenAIService>(provider =>
+            services.AddSingleton<ILLMServices, OpenAIService>(provider =>
             {
                 var configService = provider.GetRequiredService<ConfigurationService>();
                 return new OpenAIService(configService.GetConfiguration());
             });
+
+            services.AddSingleton<ICompiler, RuntimeCompiler>();
         }
     }
 }

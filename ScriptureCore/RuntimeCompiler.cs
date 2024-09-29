@@ -1,11 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Reflection;
 
 namespace ScriptureCore
 {
-    public class RuntimeCompiler
+    internal class RuntimeCompiler: ICompiler
     {
-        public static (bool Success, List<string> Errors) TestCompile(string code)
+        public (bool Success, List<string> Errors) TestCompile(string code)
         {
             var syntaxTree = CSharpSyntaxTree.ParseText(code);
 
@@ -31,5 +32,4 @@ namespace ScriptureCore
             return (result.Success, errors);
         }
     }
-
 }

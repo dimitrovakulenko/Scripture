@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoCAD.NET" Version="25.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ScriptureCore\ScriptureCore.csproj" />
     <ProjectReference Include="..\ScriptureUI\ScriptureUI.csproj" />
   </ItemGroup>

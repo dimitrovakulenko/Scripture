@@ -2,11 +2,10 @@
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Chat;
-using System;
 
 namespace ScriptureCore
 {
-    public class OpenAIService
+    internal class OpenAIService: ILLMServices
     {
         private readonly ChatClient _initialScriptClient;
 
@@ -53,7 +52,7 @@ namespace ScriptureCore
             return RemoveCodeFence(completeAnswer);
         }
 
-        public static string RemoveCodeFence(string code)
+        private static string RemoveCodeFence(string code)
         {
             if (code.StartsWith("```csharp", StringComparison.OrdinalIgnoreCase))
             {

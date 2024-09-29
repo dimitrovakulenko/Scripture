@@ -2,6 +2,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ScriptureCore.Tests
 {
@@ -9,18 +10,23 @@ namespace ScriptureCore.Tests
     {
         public RuntimeCompilerTests()
         {
+            // hacky load of autocad dlls
             try
             {
                 Document doc = Application.DocumentManager.MdiActiveDocument;
+                Editor ed = doc.Editor;
+                ObjectId objectId = new ObjectId();
+                Point3d point3D = new Point3d();
+                if (objectId.IsErased) point3D = point3D * 2;
             }
             catch { }
-            try
-            {
-                Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
-            }
-            catch { }
-            ObjectId objectId = new ObjectId();
-            Point3d point3D = new Point3d();
+
+            // register services
+            var serviceCollection = new ServiceCollection();
+            ServiceRegistration.RegisterServices(serviceCollection);
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            ServiceLocator.SetServiceProvider(serviceProvider);
         }
 
         [Fact]
@@ -42,7 +48,9 @@ namespace ScriptureCore.Tests
             }
         }";
 
-            var (success, errors) = RuntimeCompiler.TestCompile(code);
+            var compiler = ServiceLocator.GetService<ICompiler>();
+
+            var (success, errors) = compiler.TestCompile(code);
 
             Assert.True(success, $"Compilation failed with errors: {string.Join(Environment.NewLine, errors)}");
         }
