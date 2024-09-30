@@ -1,13 +1,11 @@
 ﻿using ScriptureCore;
-using System.CodeDom.Compiler;
+using System.Configuration;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace ScriptureUI
 {
-    /// <summary>
-    /// Interaction logic for ScriptureControl.xaml
-    /// </summary>
     public partial class ScriptureControl : UserControl
     {
         public ScriptureControl()
@@ -16,9 +14,25 @@ namespace ScriptureUI
 
             ScriptEditor.Options.IndentationSize = 4;
             ScriptEditor.Options.ConvertTabsToSpaces = false;
+
+            var dllPath = ConfigurationManager.AppSettings["DllPath"];
+            DllPathTextBox.Text = !string.IsNullOrWhiteSpace(dllPath) 
+                ? dllPath 
+                : System.IO.Path.Combine(
+                    Environment.GetFolderPath(
+                        Environment.SpecialFolder.MyDocuments), "AutoCADPlugins"); ;
         }
 
-        private async void OnGenerateScriptClick(object sender, System.Windows.RoutedEventArgs e)
+        private void SaveDllPathToConfig(string dllPath)
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            config.AppSettings.Settings.Remove("DllPath");
+            config.AppSettings.Settings.Add("DllPath", dllPath);
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
+        }
+
+        private async void OnGenerateScriptClick(object sender, RoutedEventArgs e)
         {
             string userPrompt = ScriptDescriptionTextBox.Text;
 
@@ -29,36 +43,25 @@ namespace ScriptureUI
 
             try
             {
-                // Disable the button during processing
                 GenerateScriptButton.IsEnabled = false;
 
-                // Show progress bar and status
-                UpdateProgress("Generating initial script...", 20);
-
                 var llmServices = ServiceLocator.GetService<ILLMServices>();
-                var compiler = ServiceLocator.GetService<ICompiler>();
 
-                // Generate the script using the user's prompt
-                string generatedScript = await llmServices.GenerateInitialScriptAsync(userPrompt);
+                var generatedScript = await llmServices.GenerateInitialScriptAsync(userPrompt);
 
-                // Display the generated script in the output TextBox
                 ScriptEditor.Text = generatedScript;
 
-                // Update progress
-                UpdateProgress("Compiling script...", 60);
+                Recompile();
 
-                var res = compiler.TestCompile(generatedScript);
-
-                ScriptStatusLabel.Content = res.Success 
-                    ? "Successfully compiled" 
-                    : $"Compilation failed : {string.Join(';', res.Errors)}";
-                UpdateProgress(res.Success ? "Compilation succeeded" : "Compilation failed", 100);
+                if (!LastCompilationStatus.Success)
+                {
+                    MainTabControl.SelectedIndex = 1;
+                }
+                ((TabItem)MainTabControl.Items[1]).IsEnabled = true;
             }
             catch (Exception ex)
             {
-                ScriptEditor.Text = ex.ToString();
-                ScriptStatusLabel.Content = "An error occurred";
-                UpdateProgress("Error occurred", 100);
+                ScriptStatusTextBox.Text = "An error occurred: " + ex.ToString();
             }
             finally
             {
@@ -66,30 +69,65 @@ namespace ScriptureUI
             }
         }
 
-        private void UpdateProgress(string status, int progressValue)
-        {
-            if (MainProgressBar.Value == 0)
-                MainProgressBar.Visibility = System.Windows.Visibility.Visible;
-            ProgressStatusLabel.Text = status;
-            MainProgressBar.Value = progressValue;
-            if (MainProgressBar.Value == 100)
-            {
-                MainProgressBar.Visibility = System.Windows.Visibility.Collapsed;
-                MainProgressBar.Value = 0;
-            }
-        }
+        private (bool Success, List<string> Errors) LastCompilationStatus { get; set; }
 
-        private void OnRecompileScriptClick(object sender, System.Windows.RoutedEventArgs e)
+        private void Recompile()
         {
             var compiler = ServiceLocator.GetService<ICompiler>();
 
-            var res = compiler.TestCompile(ScriptEditor.Text);
-            ScriptStatusLabel.Content = res.Success
+            LastCompilationStatus = compiler.TestCompile(ScriptEditor.Text);
+            ScriptStatusTextBox.Text = LastCompilationStatus.Success
                 ? "Successfully compiled"
-                : $"Compilation failed : {string.Join(';', res.Errors)}";
+                : $"Compilation failed:{Environment.NewLine} " +
+                $"{string.Join(Environment.NewLine, LastCompilationStatus.Errors)}";
+
+            if (LastCompilationStatus.Success)
+            {
+                MainTabControl.SelectedIndex = 2;
+                ((TabItem)MainTabControl.Items[2]).IsEnabled = true;
+
+                var commandName = ExtractCommandName(ScriptEditor.Text);
+                if (commandName != null)
+                {
+                    CommandNameTextBox.Text = commandName;
+                }
+            }
+            else
+            {
+                ((TabItem)MainTabControl.Items[2]).IsEnabled = false;
+            }
         }
 
-        private void OnExecuteScriptClick(object sender, System.Windows.RoutedEventArgs e)
+        private void OnRecompileScriptClick(object sender, RoutedEventArgs e)
+        {
+            Recompile();
+        }
+
+        private void OnTryFixClick(object sender, RoutedEventArgs e)
+        {
+            // Implementation to be added for trying to fix the script
+        }
+
+        private void OnExecutionModeChanged(object sender, RoutedEventArgs e)
+        {
+            if ((bool)((RadioButton)sender).IsChecked && PluginOptionsPanel != null)
+            {
+                var radioButton = sender as RadioButton;
+
+                if (radioButton?.Content.ToString() == "Create Plugin")
+                {
+                    PluginOptionsPanel.Visibility = Visibility.Visible;
+                    ExecuteScriptButton.Content = "Create Plugin";
+                }
+                else
+                {
+                    PluginOptionsPanel.Visibility = Visibility.Collapsed;
+                    ExecuteScriptButton.Content = "Execute Script";
+                }
+            }
+        }
+
+        private void OnExecuteScriptClick(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -99,35 +137,58 @@ namespace ScriptureUI
                     throw new Exception("Command name not found");
 
                 var compiler = ServiceLocator.GetService<ICompiler>();
-                var (success, errors, dllPath) = compiler.CompileToTemporaryFile(script);
 
-                if (!success)
+                if ((bool)CreatePluginRadioButton.IsChecked)
                 {
-                    ScriptStatusLabel.Content = "Compilation failed";
-                    ScriptEditor.Text = string.Join(Environment.NewLine, errors);
-                    return;
+                    var dllPath = DllPathTextBox.Text;
+                    if (string.IsNullOrWhiteSpace(dllPath))
+                    {
+                        return;
+                    }
+
+                    SaveDllPathToConfig(dllPath);
+
+                    var customCommandName = CommandNameTextBox.Text;
+                    if (!string.IsNullOrWhiteSpace(customCommandName))
+                    {
+                        script = ReplaceCommandName(script, commandName, customCommandName);
+                        commandName = customCommandName;
+                    }
+
+                    // TODO:
+                    // var (success, errors, dllFilePath) = compiler.CompileToCustomPath(script, dllPath);
+                    // Handle success and errors...
+
+                    ScriptStatusTextBox.Text = "Plugin created successfully";
                 }
+                else
+                {
+                    var (success, errors, dllFilePath) = compiler.CompileToTemporaryFile(script);
 
-                var scriptExecutor = ServiceLocator.GetService<IScriptExecutor>();
-                scriptExecutor.Execute(dllPath, commandName);
+                    if (!success)
+                        return;
 
-                ScriptStatusLabel.Content = "Script executed successfully";
+                    var scriptExecutor = ServiceLocator.GetService<IScriptExecutor>();
+                    scriptExecutor.Execute(dllFilePath, commandName);
+
+                    ScriptStatusTextBox.Text = "Script executed successfully";
+                }
             }
             catch (Exception ex)
             {
-                ScriptStatusLabel.Content = "Execution failed";
-                ScriptEditor.Text = ex.ToString();
+                ScriptStatusTextBox.Text = "Execution failed";
             }
         }
 
         private string? ExtractCommandName(string script)
         {
-            // Regular expression to find the command name in [CommandMethod("CommandName")]
             var match = Regex.Match(script, @"\[CommandMethod\(""([^""]+)""\)\]");
-
-            // If a match is found, return the command name, otherwise return null
             return match.Success ? match.Groups[1].Value : null;
         }
 
+        private string ReplaceCommandName(string script, string oldCommandName, string newCommandName)
+        {
+            return script.Replace($"[CommandMethod(\"{oldCommandName}\")]", $"[CommandMethod(\"{newCommandName}\")]");
+        }
     }
 }

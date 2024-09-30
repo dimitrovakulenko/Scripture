@@ -4,39 +4,90 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
-             xmlns:local="clr-namespace:ScriptureUI"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel Margin="10">
-        <!-- Progress Bar and Status Text -->
-        <Grid>
-            <ProgressBar x:Name="MainProgressBar" Height="20" Minimum="0" Maximum="100" Visibility="Collapsed" />
-            <TextBlock x:Name="ProgressStatusLabel" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-        </Grid>
-        
-        <!-- Label -->
-        <Label Content="Please enter description of the script" />
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!--<Style TargetType="TabItem">
+            <Setter Property="Background" Value="MediumPurple"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#FF5733"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>-->
+    </UserControl.Resources>
+    <Grid Margin="10">
+        <TabControl x:Name="MainTabControl">
+            <!-- Step 1: Script Description -->
+            <TabItem Header="Step 1: Script Description">
+                <StackPanel Margin="10">
+                    <Label Content="Please input description of an action you would like to perform" />
+                    <TextBox x:Name="ScriptDescriptionTextBox" Height="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Text="select all polygons with an area less than 200" />
+                    <Button x:Name="GenerateScriptButton" Content="Generate Script" Margin="0,10,0,0" Click="OnGenerateScriptClick" />
+                </StackPanel>
+            </TabItem>
 
-        <!-- Multiline TextBox -->
-        <TextBox x:Name="ScriptDescriptionTextBox" Height="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+            <!-- Step 2: Script Fine-Tuning -->
+            <TabItem Header="Step 2: Script Fine-Tuning" IsEnabled="False">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-        <!-- Generate Script -->
-        <Button x:Name="GenerateScriptButton" Content="Generate Script" Margin="0,10,0,0" Click="OnGenerateScriptClick" />
+                    <avalonedit:TextEditor Grid.Row="0" Name="ScriptEditor" SyntaxHighlighting="C#" ShowLineNumbers="True" />
+                    <TextBox Grid.Row="1" Name="ScriptStatusTextBox" Text="Script Status: Not ready" Margin="0,10,0,0"
+                             AcceptsReturn="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+                    <UniformGrid Grid.Row="2" Columns="2" Margin="0,10,0,0">
+                        <Button Content="Try Fix" Click="OnTryFixClick" />
+                        <Button Content="Recompile Script" Click="OnRecompileScriptClick" />
+                    </UniformGrid>
+                </Grid>
+            </TabItem>
 
-        <!-- Placeholder for AvalonEdit (Collapsible) -->
-        <Expander Header="Script Editor" IsExpanded="False">
-            <avalonedit:TextEditor Name="ScriptEditor" Height="400" SyntaxHighlighting="C#"
-                                   ShowLineNumbers="True"/>
-        </Expander>
+            <!-- Step 3: Execution Step -->
+            <TabItem Header="Step 3: Execution Step" IsEnabled="False">
+                <StackPanel Margin="10">
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <RadioButton GroupName="ExecutionMode" Content="Execute Immediately" IsChecked="True" Checked="OnExecutionModeChanged" />
+                        <RadioButton x:Name="CreatePluginRadioButton" GroupName="ExecutionMode" Content="Create Plugin" Margin="20,0,0,0" Checked="OnExecutionModeChanged" />
+                    </StackPanel>
 
-        <!-- Status Label -->
-        <Label Content="Script Status: Not ready" Name="ScriptStatusLabel" />
+                    <Grid x:Name="PluginOptionsPanel" Visibility="Collapsed" Margin="0,10,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-        <!-- Recompile Button -->
-        <Button Content="Recompile Script" Margin="0,10,0,0" Click="OnRecompileScriptClick" />
-        
-        <!-- Execute Button -->
-        <Button Content="Execute Script" Margin="0,10,0,0" Click="OnExecuteScriptClick"/>
-    </StackPanel>
+                        <Label Content="DLL Path:" Grid.Row="0" Grid.Column="0" />
+                        <TextBox x:Name="DllPathTextBox" Grid.Row="0" Grid.Column="1" Margin="5,0,0,0" />
 
+                        <Label Content="Command Name:" Grid.Row="1" Grid.Column="0" />
+                        <TextBox x:Name="CommandNameTextBox" Grid.Row="1" Grid.Column="1" Margin="5,0,0,0" />
+                    </Grid>
+
+                    <Button x:Name="ExecuteScriptButton" Content="Execute Script" Margin="0,10,0,0" Click="OnExecuteScriptClick">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Content" Value="Execute Script" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=CreatePluginRadioButton}" Value="True">
+                                        <Setter Property="Content" Value="Create Plugin" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </UserControl>
