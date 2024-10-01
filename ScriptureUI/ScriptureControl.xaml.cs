@@ -103,9 +103,34 @@ namespace ScriptureUI
             Recompile();
         }
 
-        private void OnTryFixClick(object sender, RoutedEventArgs e)
+        private async void OnTryFixClick(object sender, RoutedEventArgs e)
         {
-            // Implementation to be added for trying to fix the script
+            try
+            {
+                var llmServices = ServiceLocator.GetService<ILLMServices>();
+
+                string script = ScriptEditor.Text;
+
+                if (LastCompilationStatus.Errors.Count == 0)
+                {
+                    return;
+                }
+
+                var fixedScript = await llmServices.TryFixScriptAsync(script, LastCompilationStatus.Errors);
+
+                if (!string.IsNullOrEmpty(fixedScript))
+                {
+                    ScriptEditor.Text = fixedScript;
+
+                    Recompile();
+                }
+                else
+                    throw new Exception("No reply");
+            }
+            catch (Exception ex)
+            {
+                // TODO: handle error
+            }
         }
 
         private void OnExecutionModeChanged(object sender, RoutedEventArgs e)

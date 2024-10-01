@@ -3,7 +3,7 @@ using Azure.AI.OpenAI;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
-using System.ClientModel;
+using System.Text.RegularExpressions;
 
 namespace ScriptureCore
 {
@@ -60,6 +60,87 @@ namespace ScriptureCore
             var completeAnswer = string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
             return RemoveCodeFence(completeAnswer);
         }
+
+        public async Task<string> TryFixScriptAsync(string script, List<string> errorMessages)
+        {
+            var messages = new List<ChatMessage>
+            {
+                new SystemChatMessage(@"You are an expert C# developer specializing in AutoCAD ObjectARX.NET API. 
+                    Your task is to fix the provided script based on the error messages below.
+                    Please ensure:
+                    1. The corrected version is complete, with all necessary 'using' statements, namespaces, and class definitions.
+                    2. Return only the corrected C# code, without any extra explanations or comments."),
+
+                new UserChatMessage($"Here is the script that needs fixing:\n```csharp\n{script}\n```"),
+                new UserChatMessage($"Here are the error messages:\n{string.Join("\n", errorMessages)}")
+            };
+
+            var typeNames = new List<string>();
+            foreach (var errorMessage in errorMessages)
+            {
+                if (Regex.IsMatch(errorMessage, @"'([^']+)' does not contain a definition for '([^']+)'"))
+                {
+                    var typeName = Regex.Match(errorMessage, @"'([^']+)' does not contain a definition for").Groups[1].Value;
+                    typeNames.Add(typeName);
+                }
+                else if (Regex.IsMatch(errorMessage, @"Non-invocable member '([^']+)' cannot be used like a method"))
+                {
+                    var typeName = Regex.Match(errorMessage, @"Non-invocable member '([^\.]+)\.").Groups[1].Value;
+                    typeNames.Add(typeName);
+                }
+            }
+
+            if (typeNames.Any())
+            {
+                var compiler = ServiceLocator.GetService<ICompiler>();
+                foreach (var typeName in typeNames)
+                {
+                    var reflectionInfo = GetReflectionInfo(
+                        compiler.GetFullyQualifiedTypeName(
+                            typeName, script));
+                    if (!string.IsNullOrEmpty(reflectionInfo))
+                    {
+                        messages.Add(new UserChatMessage($"Here is the information about the type '{typeName}':\n{reflectionInfo}"));
+                    }
+
+                }
+            }
+
+            ChatCompletionOptions options = new()
+            {
+                MaxOutputTokenCount = 1024,
+                Temperature = 0.3f,
+            };
+
+            var completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
+            var completeAnswer = string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
+            return RemoveCodeFence(completeAnswer);
+        }
+
+        private string GetReflectionInfo(string typeName)
+        {
+            try
+            {
+                var type = Type.GetType(typeName);
+                if (type == null)
+                {
+                    return string.Empty;
+                }
+
+                var properties = type.GetProperties();
+                var methods = type.GetMethods();
+
+                var propertyInfo = string.Join(", ", properties.Select(p => $"{p.PropertyType.Name} {p.Name}"));
+                var methodInfo = string.Join(", ", methods.Select(m => $"{m.ReturnType.Name} {m.Name}()"));
+
+                return $"Properties: {propertyInfo}\nMethods: {methodInfo}";
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
 
         private static string RemoveCodeFence(string code)
         {

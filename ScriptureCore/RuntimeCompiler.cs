@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Reflection;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ScriptureCore
 {
@@ -10,11 +10,7 @@ namespace ScriptureCore
         {
             var syntaxTree = CSharpSyntaxTree.ParseText(code);
 
-            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var references = loadedAssemblies
-                .Where(assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
-                .Select(assembly => MetadataReference.CreateFromFile(assembly.Location))
-                .ToList();
+            var references = GetReferences();
 
             var compilation = CSharpCompilation.Create("TestCompilation")
                 .AddReferences(references)
@@ -31,16 +27,21 @@ namespace ScriptureCore
             return (result.Success, errors);
         }
 
-        public (bool Success, List<string> Errors, string DllPath) CompileToTemporaryFile(string code)
+        private List<MetadataReference> GetReferences()
         {
-            string tempFileName = Path.Combine(Path.GetTempPath(), $"GeneratedScript_{Guid.NewGuid()}.dll");
-            var syntaxTree = CSharpSyntaxTree.ParseText(code);
-
             var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var references = loadedAssemblies
+            return loadedAssemblies
                 .Where(assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
                 .Select(assembly => MetadataReference.CreateFromFile(assembly.Location))
-                .ToList();
+                .ToList<MetadataReference>();
+        }
+
+        public (bool Success, List<string> Errors, string DllPath) CompileToTemporaryFile(string code)
+        {
+            var tempFileName = Path.Combine(Path.GetTempPath(), $"GeneratedScript_{Guid.NewGuid()}.dll");
+            var syntaxTree = CSharpSyntaxTree.ParseText(code);
+
+            var references = GetReferences();
 
             var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(tempFileName))
                 .AddReferences(references)
@@ -58,6 +59,33 @@ namespace ScriptureCore
 
                 return (result.Success, errors, tempFileName);
             }
+        }
+
+        public string GetFullyQualifiedTypeName(string typeName, string code)
+        {
+            var syntaxTree = CSharpSyntaxTree.ParseText(code);
+            var root = syntaxTree.GetRoot();
+
+            var compilation = CSharpCompilation.Create("TempCompilation")
+                .AddSyntaxTrees(syntaxTree)
+                .AddReferences(
+                    GetReferences());
+            var semanticModel = compilation.GetSemanticModel(syntaxTree);
+
+            var typeNodes = syntaxTree.GetRoot().DescendantNodes().OfType<IdentifierNameSyntax>();
+            foreach (var typeNode in typeNodes)
+            {
+                var symbolInfo = semanticModel.GetSymbolInfo(typeNode);
+                if (symbolInfo.Symbol != null && symbolInfo.Symbol.Name == typeName)
+                {
+                    var typeSymbol = symbolInfo.Symbol as ITypeSymbol;
+                    if (typeSymbol != null)
+                    {
+                        return typeSymbol.ToDisplayString();
+                    }
+                }
+            }
+            return typeName;
         }
     }
 }

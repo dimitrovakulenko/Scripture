@@ -5,5 +5,8 @@
         (bool Success, List<string> Errors) TestCompile(string code);
 
         (bool Success, List<string> Errors, string DllPath) CompileToTemporaryFile(string code);
+
+        string GetFullyQualifiedTypeName(string typeName, string code);
+
     }
 }
