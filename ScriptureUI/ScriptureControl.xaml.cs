@@ -1,12 +1,14 @@
 ﻿using ScriptureCore;
+using System.ComponentModel;
 using System.Configuration;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace ScriptureUI
 {
-    public partial class ScriptureControl : UserControl
+    public partial class ScriptureControl : UserControl, INotifyPropertyChanged
     {
         public ScriptureControl()
         {
@@ -21,6 +23,36 @@ namespace ScriptureUI
                 : System.IO.Path.Combine(
                     Environment.GetFolderPath(
                         Environment.SpecialFolder.MyDocuments), "AutoCADPlugins"); ;
+
+            DataContext = this;
+        }
+
+        private bool _generatingScript = false;
+        public bool GeneratingScript
+        {
+            get => _generatingScript;
+            set
+            {
+                if (_generatingScript != value)
+                {
+                    _generatingScript = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool _scriptCompiledWithoutErrors = false;
+        public bool ScriptCompiledWithoutErrors
+        {
+            get => _scriptCompiledWithoutErrors;
+            set
+            {
+                if (_scriptCompiledWithoutErrors != value)
+                {
+                    _scriptCompiledWithoutErrors = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         private void SaveDllPathToConfig(string dllPath)
@@ -29,6 +61,7 @@ namespace ScriptureUI
             config.AppSettings.Settings.Remove("DllPath");
             config.AppSettings.Settings.Add("DllPath", dllPath);
             config.Save(ConfigurationSaveMode.Modified);
+
             ConfigurationManager.RefreshSection("appSettings");
         }
 
@@ -38,12 +71,13 @@ namespace ScriptureUI
 
             if (string.IsNullOrWhiteSpace(userPrompt))
             {
+                ScriptDescriptionTextBox.Text = "Please enter script descripion here";
                 return;
             }
 
             try
             {
-                GenerateScriptButton.IsEnabled = false;
+                GeneratingScript = true;
 
                 var llmServices = ServiceLocator.GetService<ILLMServices>();
 
@@ -57,7 +91,6 @@ namespace ScriptureUI
                 {
                     MainTabControl.SelectedIndex = 1;
                 }
-                ((TabItem)MainTabControl.Items[1]).IsEnabled = true;
             }
             catch (Exception ex)
             {
@@ -65,7 +98,7 @@ namespace ScriptureUI
             }
             finally
             {
-                GenerateScriptButton.IsEnabled = true;
+                GeneratingScript = false;
             }
         }
 
@@ -84,7 +117,6 @@ namespace ScriptureUI
             if (LastCompilationStatus.Success)
             {
                 MainTabControl.SelectedIndex = 2;
-                ((TabItem)MainTabControl.Items[2]).IsEnabled = true;
 
                 var commandName = ExtractCommandName(ScriptEditor.Text);
                 if (commandName != null)
@@ -92,10 +124,8 @@ namespace ScriptureUI
                     CommandNameTextBox.Text = commandName;
                 }
             }
-            else
-            {
-                ((TabItem)MainTabControl.Items[2]).IsEnabled = false;
-            }
+
+            ScriptCompiledWithoutErrors = LastCompilationStatus.Success;
         }
 
         private void OnRecompileScriptClick(object sender, RoutedEventArgs e)
@@ -107,14 +137,14 @@ namespace ScriptureUI
         {
             try
             {
+                GeneratingScript = true;
+
                 var llmServices = ServiceLocator.GetService<ILLMServices>();
 
                 string script = ScriptEditor.Text;
 
                 if (LastCompilationStatus.Errors.Count == 0)
-                {
                     return;
-                }
 
                 var fixedScript = await llmServices.TryFixScriptAsync(script, LastCompilationStatus.Errors);
 
@@ -130,6 +160,10 @@ namespace ScriptureUI
             catch (Exception ex)
             {
                 // TODO: handle error
+            }
+            finally
+            {
+                GeneratingScript = false;
             }
         }
 
@@ -214,6 +248,13 @@ namespace ScriptureUI
         private string ReplaceCommandName(string script, string oldCommandName, string newCommandName)
         {
             return script.Replace($"[CommandMethod(\"{oldCommandName}\")]", $"[CommandMethod(\"{newCommandName}\")]");
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null!)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
