@@ -15,8 +15,6 @@ namespace Scripture
 
         public void Initialize()
         {
-            System.Diagnostics.Debugger.Launch();
-
             var serviceCollection = new ServiceCollection();
             ServiceRegistration.RegisterServices(serviceCollection, new ScriptExecutor());
 
