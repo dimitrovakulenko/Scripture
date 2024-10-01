@@ -36,19 +36,18 @@ namespace ScriptureCore
                 .ToList<MetadataReference>();
         }
 
-        public (bool Success, List<string> Errors, string DllPath) CompileToTemporaryFile(string code)
+        public (bool Success, List<string> Errors) CompileTo(string code, string filepath)
         {
-            var tempFileName = Path.Combine(Path.GetTempPath(), $"GeneratedScript_{Guid.NewGuid()}.dll");
             var syntaxTree = CSharpSyntaxTree.ParseText(code);
 
             var references = GetReferences();
 
-            var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(tempFileName))
+            var compilation = CSharpCompilation.Create(Path.GetFileNameWithoutExtension(filepath))
                 .AddReferences(references)
                 .AddSyntaxTrees(syntaxTree)
                 .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-            using (var fs = new FileStream(tempFileName, FileMode.Create))
+            using (var fs = new FileStream(filepath, FileMode.Create))
             {
                 var result = compilation.Emit(fs);
 
@@ -57,7 +56,7 @@ namespace ScriptureCore
                     .Select(diagnostic => diagnostic.GetMessage())
                     .ToList();
 
-                return (result.Success, errors, tempFileName);
+                return (result.Success, errors);
             }
         }
 

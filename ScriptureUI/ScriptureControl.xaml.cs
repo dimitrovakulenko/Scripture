@@ -1,6 +1,7 @@
 ﻿using ScriptureCore;
 using System.ComponentModel;
 using System.Configuration;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -17,14 +18,29 @@ namespace ScriptureUI
             ScriptEditor.Options.IndentationSize = 4;
             ScriptEditor.Options.ConvertTabsToSpaces = false;
 
-            var dllPath = ConfigurationManager.AppSettings["DllPath"];
-            DllPathTextBox.Text = !string.IsNullOrWhiteSpace(dllPath) 
-                ? dllPath 
+            _dllPath = ConfigurationManager.AppSettings["DllPath"];
+            _dllPath = !string.IsNullOrWhiteSpace(_dllPath) 
+                ? _dllPath
                 : System.IO.Path.Combine(
                     Environment.GetFolderPath(
-                        Environment.SpecialFolder.MyDocuments), "AutoCADPlugins"); ;
+                        Environment.SpecialFolder.MyDocuments), "AutoCADPlugins", "scripturePlugin.dll");
+
 
             DataContext = this;
+        }
+
+        public string? _dllPath;
+        public string? DllPath
+        {
+            get => _dllPath;
+            set
+            {
+                if (_dllPath != value)
+                {
+                    _dllPath = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         private bool _generatingScript = false;
@@ -39,7 +55,10 @@ namespace ScriptureUI
                     OnPropertyChanged();
 
                     if (!_generatingScript)
+                    {
                         ProgressStatusText = "";
+                        _scriptCompiledWithoutErrors = false;
+                    }
                 }
             }
         }
@@ -53,6 +72,20 @@ namespace ScriptureUI
                 if (_scriptCompiledWithoutErrors != value)
                 {
                     _scriptCompiledWithoutErrors = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool _executingScript = false;
+        public bool ExecutingScript
+        {
+            get => _executingScript;
+            set
+            {
+                if (_executingScript != value)
+                {
+                    _executingScript = value;
                     OnPropertyChanged();
                 }
             }
@@ -189,7 +222,10 @@ namespace ScriptureUI
 
         private void OnExecutionModeChanged(object sender, RoutedEventArgs e)
         {
-            if ((bool)((RadioButton)sender).IsChecked && PluginOptionsPanel != null)
+            if (PluginOptionsPanel is null)
+                return;
+
+            if (((RadioButton)sender).IsChecked ?? false)
             {
                 var radioButton = sender as RadioButton;
 
@@ -217,15 +253,22 @@ namespace ScriptureUI
 
                 var compiler = ServiceLocator.GetService<ICompiler>();
 
-                if ((bool)CreatePluginRadioButton.IsChecked)
+                if (CreatePluginRadioButton.IsChecked ?? false)
                 {
-                    var dllPath = DllPathTextBox.Text;
-                    if (string.IsNullOrWhiteSpace(dllPath))
+                    if (string.IsNullOrWhiteSpace(DllPath))
                     {
+                        var res = MessageBox.Show("Enter dll name please", "Error");
                         return;
                     }
 
-                    SaveDllPathToConfig(dllPath);
+                    if (File.Exists(DllPath))
+                    {
+                        var res = MessageBox.Show("The dll already exists, overwrite?", "Warning", MessageBoxButton.YesNo);
+                        if (res == MessageBoxResult.No)
+                            return;
+                    }
+
+                    SaveDllPathToConfig(DllPath);
 
                     var customCommandName = CommandNameTextBox.Text;
                     if (!string.IsNullOrWhiteSpace(customCommandName))
@@ -234,28 +277,29 @@ namespace ScriptureUI
                         commandName = customCommandName;
                     }
 
-                    // TODO:
-                    // var (success, errors, dllFilePath) = compiler.CompileToCustomPath(script, dllPath);
-                    // Handle success and errors...
+                    var (success, errors) = compiler.CompileTo(script, DllPath);
 
-                    ScriptStatusTextBox.Text = "Plugin created successfully";
+                    MessageBox.Show(success ? "Succeeded" : $"Failed:\n {string.Join(',', errors)}", "Result");
                 }
                 else
                 {
-                    var (success, errors, dllFilePath) = compiler.CompileToTemporaryFile(script);
+                    var tempFileName = Path.Combine(Path.GetTempPath(), $"GeneratedScript_{Guid.NewGuid()}.dll");
+
+                    var (success, errors) = compiler.CompileTo(script, tempFileName);
 
                     if (!success)
+                    {
+                        MessageBox.Show($"Failed to compile:#\n{string.Join(',', errors)}", "Result");
                         return;
+                    }
 
                     var scriptExecutor = ServiceLocator.GetService<IScriptExecutor>();
-                    scriptExecutor.Execute(dllFilePath, commandName);
-
-                    ScriptStatusTextBox.Text = "Script executed successfully";
+                    scriptExecutor.Execute(tempFileName, commandName);
                 }
             }
             catch (Exception ex)
             {
-                ScriptStatusTextBox.Text = "Execution failed";
+                MessageBox.Show(ex.ToString(), "Error");
             }
         }
 
