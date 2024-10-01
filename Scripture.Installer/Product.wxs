@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="Scripture Plugin" Language="1033" Version="1.0.0.0" Manufacturer="Dmytro Vakulenko" UpgradeCode="1132b1b1-91e1-4b1d-9364-2a62b2b20d7c">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Feature Id="ProductFeature" Title="Scripture Plugin" Description="Installs the Scripture Plugin for automation from text input." Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Scripture Plugin" />
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- Component for the main DLL -->
+      <Component Id="MainComponent" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1e01">
+        <File Id="ScriptureDLL" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\scripture.dll" KeyPath="yes" />
+      </Component>
+
+      <Component Id="ScriptureCore" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1e02">
+        <File Id="ScriptureCoreDLL" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\ScriptureCore.dll" KeyPath="yes" />
+      </Component>
+
+      <Component Id="ScriptureUI" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1e03">
+        <File Id="ScriptureUIDLL" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\ScriptureUI.dll" KeyPath="yes" />
+      </Component>
+
+      <!-- Dependencies Components -->
+      <Component Id="DependenciesComponent" Guid="26bc77f1-4295-4634-94d3-1b4126f540b7">
+        <!-- AvalonEdit -->
+        <File Id="AvalonEdit" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\ICSharpCode.AvalonEdit.dll" KeyPath="no" />
+
+        <!-- Azure AI OpenAI -->
+        <File Id="AzureAI" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Azure.AI.OpenAI.dll" KeyPath="no" />
+        <File Id="AzureCore" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Azure.Core.dll" KeyPath="no" />
+        <File Id="OpenAI" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\OpenAI.dll" KeyPath="no" />
+
+        <!-- Microsoft Extensions -->
+        <File Id="MicrosoftExtensionsvar.Configuration" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Microsoft.Extensions.Configuration.dll" KeyPath="no" />
+        <File Id="MicrosoftExtensionsvar.ConfigurationJson" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Microsoft.Extensions.Configuration.Json.dll" KeyPath="no" />
+        <File Id="MicrosoftExtensionsDependencyInjection" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Microsoft.Extensions.DependencyInjection.dll" KeyPath="no" />
+        <File Id="MicrosoftExtensionsDependencyInjectionAbstractions" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Microsoft.Extensions.DependencyInjection.Abstractions.dll" KeyPath="no" />
+
+        <!-- System Libraries -->
+        <File Id="SystemClientModel" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\System.ClientModel.dll" KeyPath="no" />
+        <File Id="SystemMemoryData" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\System.Memory.Data.dll" KeyPath="no" />
+        <File Id="SystemTextEncodingsWeb" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\System.Text.Encodings.Web.dll" KeyPath="no" />
+        <File Id="SystemTextJson" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\System.Text.Json.dll" KeyPath="no" />
+        <File Id="SystemThreadingTasksExtensions" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\System.Threading.Tasks.Extensions.dll" KeyPath="no" />
+
+        <!-- Additional dependencies for Microsoft.CodeAnalysis -->
+        <File Id="SystemReflectionMetadata" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\System.Reflection.Metadata.dll" KeyPath="no" />
+        <File Id="SystemCollectionsImmutable" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\System.Collections.Immutable.dll" KeyPath="no" />
+        <File Id="MicrosoftCodeAnalysis" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Microsoft.CodeAnalysis.dll" KeyPath="no" />
+        <File Id="MicrosoftCodeAnalysisCSharp" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\Microsoft.CodeAnalysis.CSharp.dll" KeyPath="no" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
