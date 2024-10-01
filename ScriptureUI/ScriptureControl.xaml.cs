@@ -37,6 +37,9 @@ namespace ScriptureUI
                 {
                     _generatingScript = value;
                     OnPropertyChanged();
+
+                    if (!_generatingScript)
+                        ProgressStatusText = "";
                 }
             }
         }
@@ -65,6 +68,7 @@ namespace ScriptureUI
             ConfigurationManager.RefreshSection("appSettings");
         }
 
+        private static int _fixErrorAttemptsNumber = 5;
         private async void OnGenerateScriptClick(object sender, RoutedEventArgs e)
         {
             string userPrompt = ScriptDescriptionTextBox.Text;
@@ -81,20 +85,35 @@ namespace ScriptureUI
 
                 var llmServices = ServiceLocator.GetService<ILLMServices>();
 
+                ProgressStatusText = "Generating initial script";
                 var generatedScript = await llmServices.GenerateInitialScriptAsync(userPrompt);
 
-                ScriptEditor.Text = generatedScript;
-
-                Recompile();
-
-                if (!LastCompilationStatus.Success)
+                int attemptIndex = 0;
+                while (true)
                 {
-                    MainTabControl.SelectedIndex = 1;
+                    ScriptEditor.Text = generatedScript;
+
+                    Recompile();
+
+                    if (attemptIndex == _fixErrorAttemptsNumber
+                        || LastCompilationStatus.Success)
+                    {
+                        if (!LastCompilationStatus.Success)
+                            MainTabControl.SelectedIndex = 1;
+
+                        break;
+
+                    }
+
+                    attemptIndex++;
+                    ProgressStatusText = $"Fixing generated script (attempt {attemptIndex} out of {_fixErrorAttemptsNumber})";
+
+                    generatedScript = await llmServices.TryFixScriptAsync(generatedScript, LastCompilationStatus.Errors, false);                    
                 }
             }
             catch (Exception ex)
             {
-                ScriptStatusTextBox.Text = "An error occurred: " + ex.ToString();
+                MessageBox.Show(ex.ToString(), "Error");
             }
             finally
             {
@@ -146,7 +165,8 @@ namespace ScriptureUI
                 if (LastCompilationStatus.Errors.Count == 0)
                     return;
 
-                var fixedScript = await llmServices.TryFixScriptAsync(script, LastCompilationStatus.Errors);
+                ProgressStatusText = "Fixing generated script";
+                var fixedScript = await llmServices.TryFixScriptAsync(script, LastCompilationStatus.Errors, true);
 
                 if (!string.IsNullOrEmpty(fixedScript))
                 {
@@ -159,7 +179,7 @@ namespace ScriptureUI
             }
             catch (Exception ex)
             {
-                // TODO: handle error
+                MessageBox.Show(ex.ToString(), "Error");
             }
             finally
             {

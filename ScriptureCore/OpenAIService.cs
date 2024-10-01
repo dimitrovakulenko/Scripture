@@ -61,7 +61,7 @@ namespace ScriptureCore
             return RemoveCodeFence(completeAnswer);
         }
 
-        public async Task<string> TryFixScriptAsync(string script, List<string> errorMessages)
+        public async Task<string> TryFixScriptAsync(string script, List<string> errorMessages, bool provideAdditionalMetadata)
         {
             var messages = new List<ChatMessage>
             {
@@ -74,6 +74,26 @@ namespace ScriptureCore
                 new UserChatMessage($"Here is the script that needs fixing:\n```csharp\n{script}\n```"),
                 new UserChatMessage($"Here are the error messages:\n{string.Join("\n", errorMessages)}")
             };
+
+            if (provideAdditionalMetadata)
+            {
+                messages.AddRange(CollectExtraMessagesForErrors(script, errorMessages));
+            }
+
+            ChatCompletionOptions options = new()
+            {
+                MaxOutputTokenCount = 1024,
+                Temperature = 0.3f,
+            };
+
+            var completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
+            var completeAnswer = string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
+            return RemoveCodeFence(completeAnswer);
+        }
+
+        private List<ChatMessage> CollectExtraMessagesForErrors(string script, List<string> errorMessages)
+        {
+            var result = new List<ChatMessage>();
 
             var typeNames = new List<string>();
             foreach (var errorMessage in errorMessages)
@@ -100,21 +120,12 @@ namespace ScriptureCore
                             typeName, script));
                     if (!string.IsNullOrEmpty(reflectionInfo))
                     {
-                        messages.Add(new UserChatMessage($"Here is the information about the type '{typeName}':\n{reflectionInfo}"));
+                        result.Add(new UserChatMessage($"Here is the information about the type '{typeName}':\n{reflectionInfo}"));
                     }
-
                 }
             }
 
-            ChatCompletionOptions options = new()
-            {
-                MaxOutputTokenCount = 1024,
-                Temperature = 0.3f,
-            };
-
-            var completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
-            var completeAnswer = string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
-            return RemoveCodeFence(completeAnswer);
+            return result;
         }
 
         private string GetReflectionInfo(string typeName)
