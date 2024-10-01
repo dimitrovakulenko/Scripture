@@ -239,6 +239,20 @@ namespace ScriptureUI
             }
         }
 
+        private string _progressStatusText = "";
+        public string ProgressStatusText
+        {
+            get => _progressStatusText;
+            set
+            {
+                if (_progressStatusText != value)
+                {
+                    _progressStatusText = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         private string? ExtractCommandName(string script)
         {
             var match = Regex.Match(script, @"\[CommandMethod\(""([^""]+)""\)\]");
