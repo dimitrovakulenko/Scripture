@@ -19,10 +19,6 @@ jobs:
       run: choco install wixtoolset --version 3.14.0
       continue-on-error: true
 
-    - name: Add WiX to PATH
-      run: |
-        echo "$env:WIX_PATH" >> $env:PATH
-
     - name: Restore dependencies
       run: dotnet restore
 
