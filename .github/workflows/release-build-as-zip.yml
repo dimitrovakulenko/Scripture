@@ -20,14 +20,10 @@ jobs:
 
     - name: Build Release
       run: dotnet build --no-restore --configuration Release
-
-    - name: Set timestamp
-      id: set_timestamp
-      run: echo "timestamp=$('%y-%m-%d-%H-%M')" >> $GITHUB_ENV
   
     - name: Upload Zip Archive
       uses: actions/upload-artifact@v3
       with:
-        name: ScripturePlugin-${{ env.timestamp }}
+        name: ScripturePlugin-$(date +'%y-%m-%d-%H-%M')
         path: "./Scripture/bin/x64/Release/net8.0-windows/*"
 
