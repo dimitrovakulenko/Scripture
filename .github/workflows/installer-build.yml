@@ -16,8 +16,8 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Install WiX Toolset 3.14
-      run: |
-        choco install wixtoolset --version 3.14.0 -y || exit 0
+      run: choco install wixtoolset --version 3.14.0
+      continue-on-error: true
 
     - name: Add WiX to PATH
       run: |
