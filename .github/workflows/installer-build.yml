@@ -15,10 +15,15 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Install WiX Toolset
+    - name: Install WiX Toolset if necessary
       run: |
-        choco install wixtoolset --version=3.11.2 --no-progress --yes
-        echo "WIX_PATH=C:\\Program Files (x86)\\WiX Toolset v3.11\\bin" >> $GITHUB_ENV
+        $wixVersion = choco list --local-only wixtoolset --exact --version 3.14.0 | Select-String -Pattern "wixtoolset 3.14.0"
+        if (-not $wixVersion) {
+          choco install wixtoolset --version 3.14.0 -y
+        } else {
+          Write-Host "WiX Toolset 3.14.0 is already installed."
+        }
+      shell: pwsh
 
     - name: Add WiX to PATH
       run: |
