@@ -14,25 +14,25 @@
     <Chain>
       <!-- .NET 8 Desktop Runtime Installer -->
       <ExePackage Id="Net8DesktopRuntimeInstaller"
-                  SourceFile="bin\Debug\dotnet-runtime-8.0.8-win-x64.exe"
-                  Compressed="yes"
-                  InstallCommand="/quiet /norestart"
-                  InstallCondition="NOT Net8DesktopRuntimeFound"
-                  Permanent="yes"
-                  Vital="yes">
+            SourceFile="bin\Debug\dotnet-runtime-8.0.8-win-x64.exe"
+            Compressed="yes"
+            InstallCommand="/quiet /norestart /skip"
+            Permanent="yes"
+            Vital="yes">
         <ExitCode Behavior="forceReboot" Value="3010" />
       </ExePackage>
 
       <!-- Main MSI Installer -->
-      <MsiPackage SourceFile="..\Scripture.Installer\bin\$(var.Configuration)\ScriptureAutocadPlugin.msi" DisplayInternalUI="yes" />
+      <MsiPackage SourceFile="..\Scripture.Installer\bin\x64\$(var.Configuration)\ScriptureAutocadPlugin.msi" DisplayInternalUI="yes" />
     </Chain>
   </Bundle>
 
   <Fragment>
-    <util:RegistrySearch Id="Net8DesktopRuntimeFound"
+    <!--TODO: use this variable so that runtime is installed only when requried-->
+    <util:RegistrySearch Id="Net8DesktopRuntimeVersion"
                          Root="HKLM"
-                         Key="SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App"
+                         Key="SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedhost"
                          Value="Version"
-                         Variable="Net8DesktopRuntimeFound" />
+                         Variable="Net8DesktopRuntimeVersion" />
   </Fragment>
 </Wix>
