@@ -23,12 +23,13 @@ jobs:
   
     - name: Set timestamp
       id: set_timestamp
-      run: echo "timestamp=$(date +'%y-%m-%d-%H-%M')" >> $GITHUB_ENV
+      run: |
+        $timestamp = Get-Date -Format "yy-MM-dd-HH-mm"
+        echo "timestamp=$timestamp" >> $GITHUB_ENV
+      shell: pwsh
 
     - name: Upload Zip Archive
       uses: actions/upload-artifact@v3
       with:
         name: ScripturePlugin-${{ env.timestamp }}
         path: "./Scripture/bin/x64/Release/net8.0-windows/*"
-
-
