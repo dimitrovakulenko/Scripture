@@ -20,15 +20,17 @@ jobs:
 
     - name: Build Release
       run: dotnet build --no-restore --configuration Release
-
-    - name: Create Zip Archive
+  
+    - name: Set timestamp
+      id: set_timestamp
       run: |
-        $timestamp = Get-Date -Format "yyyy-MM-dd-HH-mm"
-        $zipName = "${timestamp}-ScripturePluginRelease.zip"
-        Compress-Archive -Path "./Scripture/bin/x64/Release/net8.0-windows/*" -DestinationPath "./$zipName"
-      
+        $timestamp = Get-Date -Format "yy-MM-dd-HH-mm"
+        echo "timestamp=$timestamp" | Out-File -FilePath $env:GITHUB_ENV -Append
+      shell: pwsh
+    
     - name: Upload Zip Archive
       uses: actions/upload-artifact@v3
       with:
-        name: Release-Zip
-        path: "./*.zip"
+        name: ScripturePlugin-${{ env.timestamp }}
+        path: "./Scripture/bin/x64/Release/net8.0-windows/*"
+    

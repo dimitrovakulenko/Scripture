@@ -1,0 +1,52 @@
+name: Build installers
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-zip:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Install WiX Toolset 3.14
+      run: choco install wixtoolset --version 3.14.0
+      continue-on-error: true
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Release
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Build MSI Installer
+      run: msbuild Scripture.Installer/Scripture.Installer.wixproj /p:Configuration=Release
+
+    - name: Build Bundle Installer
+      run: msbuild Scripture.Installer.Bundle/Scripture.Installer.Bundle.wixproj /p:Configuration=Release
+
+    - name: Rename and Archive Installers
+      run: |
+        $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
+        $msiOutput = "ScriptureAutocadPlugin-$timestamp.msi"
+        $bundleOutput = "ScriptureBundleInstaller-$timestamp.exe"
+
+        Rename-Item "Scripture.Installer/bin/Release/ScriptureAutocadPlugin.msi" -NewName $msiOutput
+        Rename-Item "Scripture.Installer.Bundle/bin/Release/ScriptureInstallerBundle.exe" -NewName $bundleOutput
+
+        Compress-Archive -Path $msiOutput, $bundleOutput -DestinationPath "Release-$timestamp.zip"
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Installers
+        path: Release-*.zip
