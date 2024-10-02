@@ -14,7 +14,7 @@
     <Chain>
       <!-- .NET 8 Desktop Runtime Installer -->
       <ExePackage Id="Net8DesktopRuntimeInstaller"
-            SourceFile="bin\Debug\dotnet-runtime-8.0.8-win-x64.exe"
+            SourceFile="bin\x64\$(var.Configuration)\dotnet-runtime-8.0.8-win-x64.exe"
             Compressed="yes"
             InstallCommand="/quiet /norestart /skip"
             Permanent="yes"
