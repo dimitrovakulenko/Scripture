@@ -34,19 +34,21 @@ jobs:
     - name: Build Bundle Installer
       run: msbuild Scripture.Installer.Bundle/Scripture.Installer.Bundle.wixproj /p:Configuration=Release
 
-    - name: Rename and Archive Installers
+    - name: Rename Installers
       run: |
         $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
-        $msiOutput = "ScriptureAutocadPlugin-$timestamp.msi"
-        $bundleOutput = "ScriptureBundleInstaller-$timestamp.exe"
+        Rename-Item "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi" -NewName "ScriptureAutocadPlugin-$timestamp.msi"
+        Rename-Item "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstallerBundle.exe" -NewName "ScriptureBundleInstaller-$timestamp.exe"
+      shell: pwsh
 
-        Rename-Item "Scripture.Installer/bin/Release/ScriptureAutocadPlugin.msi" -NewName $msiOutput
-        Rename-Item "Scripture.Installer.Bundle/bin/Release/ScriptureInstallerBundle.exe" -NewName $bundleOutput
-
-        Compress-Archive -Path $msiOutput, $bundleOutput -DestinationPath "Release-$timestamp.zip"
-
-    - name: Upload Artifacts
+    - name: Upload MSI Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: Installers
-        path: Release-*.zip
+        name: ScriptureAutocadPlugin
+        path: ScriptureAutocadPlugin-$timestamp.msi
+
+    - name: Upload EXE Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ScriptureBundleInstaller
+        path: ScriptureBundleInstaller-$timestamp.exe
