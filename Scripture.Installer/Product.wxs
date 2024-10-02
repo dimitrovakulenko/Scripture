@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="Scripture Plugin" Language="1033" Version="1.0.0.0" Manufacturer="Dmytro Vakulenko" UpgradeCode="1132b1b1-91e1-4b1d-9364-2a62b2b20d7c">
+  <Product Id="*" Name="Scripture Plugin" Language="1033" Version="1.0.0.0" Manufacturer="Dmytro Vakulenko" UpgradeCode="1132b1b4-91e1-4b1d-9364-2a62b2b20d7c">
     <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -13,7 +13,7 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="Scripture Plugin" />
       </Directory>
     </Directory>
@@ -22,20 +22,28 @@
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <!-- Component for the main DLL -->
-      <Component Id="MainComponent" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1e01">
+      <Component Id="MainComponent" Guid="f0739b8c-0809-45c4-8c1a-568fdfed1a02" Win64="yes">
         <File Id="ScriptureDLL" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\scripture.dll" KeyPath="yes" />
       </Component>
 
-      <Component Id="ScriptureCore" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1e02">
+      <Component Id="ScriptureCore" Guid="f0739b8c-0809-45c4-8b1a-561fdfed1a02" Win64="yes">
         <File Id="ScriptureCoreDLL" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\ScriptureCore.dll" KeyPath="yes" />
       </Component>
 
-      <Component Id="ScriptureUI" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1e03">
+      <Component Id="ScriptureUI" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1a03" Win64="yes">
         <File Id="ScriptureUIDLL" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\ScriptureUI.dll" KeyPath="yes" />
       </Component>
 
+      <Component Id="LicenseComponent" Guid="f0739b8c-0809-45c4-8b1a-568fdfed1a04" Win64="yes">
+        <File Id="LicenseFile" Source="..\LICENSE" KeyPath="yes" />
+      </Component>
+
+      <Component Id="AppSettingsComponent" Guid="f0739b8c-0809-45c4-8b1a-568fefed1e05" Win64="yes">
+        <File Id="AppSettings" Source="..\Scripture\appsettings.json" KeyPath="yes" />
+      </Component>
+
       <!-- Dependencies Components -->
-      <Component Id="DependenciesComponent" Guid="26bc77f1-4295-4634-94d3-1b4126f540b7">
+      <Component Id="DependenciesComponent" Guid="26bc77f1-4295-4634-94d3-1b4326f540b7" Win64="yes">
         <!-- AvalonEdit -->
         <File Id="AvalonEdit" Source="..\Scripture\bin\x64\$(var.Configuration)\net8.0-windows\ICSharpCode.AvalonEdit.dll" KeyPath="no" />
 

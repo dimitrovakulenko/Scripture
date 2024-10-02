@@ -3,10 +3,10 @@
      xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 
-  <Bundle Name="Scripture Plugin" Version="1.0.0.0" Manufacturer="Dmytro Vakulenko" UpgradeCode="1132b1b1-91e1-4b1d-9364-2a62b2b20d7c">
+  <Bundle Name="Scripture Plugin" Version="1.0.0.0" Manufacturer="Dmytro Vakulenko" UpgradeCode="1142b1b1-91e1-4b1d-9364-2a62b2b20d7c">
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense">
       <bal:WixStandardBootstrapperApplication
-        LicenseUrl="https://yourdomain.com/license.txt"
+        LicenseUrl="https://raw.githubusercontent.com/dimitrovakulenko/Scripture/refs/heads/master/LICENSE"
         ShowVersion="yes"
         SuppressOptionsUI="no" />
     </BootstrapperApplicationRef>
@@ -17,7 +17,7 @@
                   SourceFile="bin\Debug\dotnet-runtime-8.0.8-win-x64.exe"
                   Compressed="yes"
                   InstallCommand="/quiet /norestart"
-                  DetectCondition="Net8DesktopRuntimeFound"
+                  InstallCondition="NOT Net8DesktopRuntimeFound"
                   Permanent="yes"
                   Vital="yes">
         <ExitCode Behavior="forceReboot" Value="3010" />
