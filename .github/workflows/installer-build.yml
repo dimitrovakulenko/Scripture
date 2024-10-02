@@ -15,6 +15,9 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
     - name: Install WiX Toolset 3.14
       run: choco install wixtoolset --version 3.14.0
       continue-on-error: true
