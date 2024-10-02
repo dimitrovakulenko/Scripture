@@ -21,12 +21,18 @@ jobs:
     - name: Build Release
       run: dotnet build --no-restore --configuration Release
 
+    - name: Prepare Directory for Zipping
+      run: |
+        $outputFolder = "ScripturePlugin"
+        New-Item -ItemType Directory -Path $outputFolder
+        Copy-Item -Path "./Scripture/bin/x64/Release/net8.0-windows/*" -Destination $outputFolder -Recurse
+
     - name: Create Zip Archive
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd-HH-mm"
-        $zipName = "${timestamp}-ScripturePluginRelease.zip"
-        Compress-Archive -Path "./Scripture/bin/x64/Release/net8.0-windows/*" -DestinationPath "./$zipName"
-      
+        $zipName = "ScripturePlugin-$timestamp.zip"
+        Compress-Archive -Path "./ScripturePlugin/*" -DestinationPath "./$zipName"
+
     - name: Upload Zip Archive
       uses: actions/upload-artifact@v3
       with:
