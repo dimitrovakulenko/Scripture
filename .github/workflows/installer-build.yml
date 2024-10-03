@@ -3,6 +3,9 @@ name: Build installers
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   create-zip:
     runs-on: windows-latest
@@ -34,19 +37,43 @@ jobs:
     - name: Build Bundle Installer
       run: msbuild Scripture.Installer.Bundle/Scripture.Installer.Bundle.wixproj /p:Configuration=Release
 
-    - name: Rename and Archive Installers
+    - name: Set timestamp
+      id: set_timestamp
       run: |
-        $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
-        $msiOutput = "ScriptureAutocadPlugin-$timestamp.msi"
-        $bundleOutput = "ScriptureBundleInstaller-$timestamp.exe"
+        $timestamp = Get-Date -Format "yy-MM-dd-HH-mm"
+        echo "timestamp=$timestamp" | Out-File -FilePath $env:GITHUB_ENV -Append
+      shell: pwsh
 
-        Rename-Item "Scripture.Installer/bin/Release/ScriptureAutocadPlugin.msi" -NewName $msiOutput
-        Rename-Item "Scripture.Installer.Bundle/bin/Release/ScriptureInstallerBundle.exe" -NewName $bundleOutput
-
-        Compress-Archive -Path $msiOutput, $bundleOutput -DestinationPath "Release-$timestamp.zip"
-
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: Installers
-        path: Release-*.zip
+        tag_name: "v${{ env.timestamp }}"
+        release_name: "Release ${{ env.timestamp }}"
+        draft: false
+        prerelease: false
+
+    - name: Upload MSI Artifact to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi"
+        asset_name: "ScriptureAutocadPlugin-${{ env.timestamp }}.msi"
+        label: "MSI Installer"
+        asset_content_type: "application/octet-stream"
+    
+    - name: Upload EXE Artifact to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstaller.exe"
+        asset_name: "ScriptureBundleInstaller-${{ env.timestamp }}.exe"
+        label: "Bundle Installer"
+        asset_content_type: "application/octet-stream"
+
