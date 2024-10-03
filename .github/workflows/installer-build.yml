@@ -41,14 +41,29 @@ jobs:
         echo "timestamp=$timestamp" | Out-File -FilePath $env:GITHUB_ENV -Append
       shell: pwsh
 
-    - name: Upload MSI Artifact
-      uses: actions/upload-artifact@v3
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
       with:
-        name: ScriptureAutocadPlugin-${{ env.timestamp }}
-        path: "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi"
+        tag_name: "v${{ env.timestamp }}"
+        release_name: "Release ${{ env.timestamp }}"
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload EXE Artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload MSI Artifact to Release
+      uses: actions/upload-release-asset@v1
       with:
-        name: ScriptureBundleInstaller-${{ env.timestamp }}
-        path: "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstaller.exe"
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi"
+        asset_name: "ScriptureAutocadPlugin-${{ env.timestamp }}.msi"
+        label: "MSI Installer"
+
+    - name: Upload EXE Artifact to Release
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstaller.exe"
+        asset_name: "ScriptureBundleInstaller-${{ env.timestamp }}.exe"
+        label: "Bundle Installer"
