@@ -35,7 +35,7 @@ Please use next link: https://github.com/dimitrovakulenko/Scripture/releases to 
 
 ### Configure `appSettings.json`
 
-You can find 'appSettings.json'  file in %PROGRAMFILES% folder in case of using installer and in the bin folder of scripture project in case of local build.
+You can find 'appSettings.json'  file in `C:\Program Files\Scripture Plugin\` (%PROGRAMFILES%) folder in case of using installer and in the bin folder of scripture project in case of local build.
 To use SCRIPTURE, you need to configure the `appSettings.json` file.
 
 - **Azure OpenAI API Configuration**:
@@ -69,3 +69,42 @@ To use SCRIPTURE, you need to configure the `appSettings.json` file.
   - Set ApiKey to your OpenAI API key.
   - Set ModelName to the desired model (e.g., gpt-4o).
   - Keep Endpoint empty.
+
+### Running the Plugin in AutoCAD
+
+After installation or compilation, you can run the plugin in AutoCAD:
+
+- In AutoCAD, use the command `NETLOAD`
+- Select `scripture.dll` file from the plugin folder (`C:\Program Files\Scripture Plugin\` in case of full install, binaries folder in case of local build)
+
+### Using the Plugin
+
+Once the plugin is loaded in AutoCAD, you can use it as follows:
+
+**Step 1: Enter a Prompt and Generate Script**
+   
+   Start by entering a prompt that describes the action you want to automate, and click the "Generate Script" button. If the LLM (Language Model) successfully generates the script, you will be automatically navigated to Step 3.
+
+**Step 3: Execute or Save as Plugin**
+   
+   At this stage, you can either execute the script immediately or save it as a separate DLL/plugin for future use. If you choose to save the script, it will be compiled into a custom command dll that can be used in AutoCAD anytime by loading the DLL with the `NETLOAD` command and executing corresponding command.
+
+**Step 2: Fix Script Errors (Optional)**
+   
+   If script generation fails or produces errors, you will be taken to Step 2. 
+   
+   Here, you can attempt to fix the script automatically by clicking "Try Fix" or manually edit the script using the AvalonEdit control. 
+   
+   Once you've made changes, click "Recompile Script" to verify if the errors are resolved.
+
+### Software Architecture
+
+*(This section will be filled in by the developer)*
+
+### License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Tags
+
+#AutoCAD #CoPilot #LLM #Automation #GPT-4 #OpenAI #Azure #Plugin #Scripture #WPF #CSharp #Roslyn #RoslynAPI #.NET8 #CodeGeneration 
