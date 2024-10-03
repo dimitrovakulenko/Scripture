@@ -97,9 +97,33 @@ Once the plugin is loaded in AutoCAD, you can use it as follows:
    
    Once you've made changes, click "Recompile Script" to verify if the errors are resolved.
 
-### Software Architecture
+### Software Architecture: Concepts
 
-*(This section will be filled in by the developer)*
+- Initial script generation: ask LLM to generate script by description, try compile script, if there are errors ask LLM to fix the errors maximum N times
+- Automatic fixing / fine-tuning: provide additional content to LLM when it tries to fix compilation errors, an additional content can be all existing properties and methods of a specific class to avoid hallucinations/unexisting methods creation
+
+![Architecture: state machine](.assets/architecture_stateMachine.png)
+
+### Software Architecture: Technical
+
+**The solution**
+
+Consists of next projects:
+- ScriptureCore: contains all core services required by the plugin: script generation service (communication to LLM), script commpilation service (Roslyn API).
+- ScriptureCore.Tests: contains tests for the core services
+- ScriptureUI: a simple WPF control to host the UI; a proper viewmodel tbd;
+- ScriptureHarnessApp: enabled testing fo the UI control without running the complete plugin from Autocad
+- Scripture: Autocad .Net plugin, depends on ObjectARX.Net API
+
+**Installer**
+
+Installer implemented using Wix 3.1x.
+Scripture.Installer project results in plugin msi installer.
+Scripture.Bundle.Installer project results in exe file that install plugin and .Net runtime.
+
+**CI & Release Builds**
+
+Implemented as github actions
 
 ### License
 
