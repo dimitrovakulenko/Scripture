@@ -104,7 +104,3 @@ Once the plugin is loaded in AutoCAD, you can use it as follows:
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### Tags
-
-#AutoCAD #CoPilot #LLM #Automation #GPT-4 #OpenAI #Azure #Plugin #Scripture #WPF #CSharp #Roslyn #RoslynAPI #.NET8 #CodeGeneration 
