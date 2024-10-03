@@ -34,21 +34,21 @@ jobs:
     - name: Build Bundle Installer
       run: msbuild Scripture.Installer.Bundle/Scripture.Installer.Bundle.wixproj /p:Configuration=Release
 
-    - name: Rename Installers
+    - name: Set timestamp
+      id: set_timestamp
       run: |
-        $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
-        Rename-Item "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi" -NewName "ScriptureAutocadPlugin-$timestamp.msi"
-        Rename-Item "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstaller.exe" -NewName "ScriptureInstaller-$timestamp.exe"
+        $timestamp = Get-Date -Format "yy-MM-dd-HH-mm"
+        echo "timestamp=$timestamp" | Out-File -FilePath $env:GITHUB_ENV -Append
       shell: pwsh
 
     - name: Upload MSI Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ScriptureAutocadPlugin
-        path: ScriptureAutocadPlugin-$timestamp.msi
+        name: ScriptureAutocadPlugin-${{ env.timestamp }}
+        path: "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi"
 
     - name: Upload EXE Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ScriptureBundleInstaller
-        path: ScriptureBundleInstaller-$timestamp.exe
+        name: ScriptureBundleInstaller-${{ env.timestamp }}
+        path: "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstaller.exe"
