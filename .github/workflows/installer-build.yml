@@ -38,7 +38,7 @@ jobs:
       run: |
         $timestamp = Get-Date -Format "yyyyMMdd-HHmm"
         Rename-Item "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi" -NewName "ScriptureAutocadPlugin-$timestamp.msi"
-        Rename-Item "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstallerBundle.exe" -NewName "ScriptureBundleInstaller-$timestamp.exe"
+        Rename-Item "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstaller.exe" -NewName "ScriptureInstaller-$timestamp.exe"
       shell: pwsh
 
     - name: Upload MSI Artifact
