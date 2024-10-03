@@ -57,16 +57,23 @@ jobs:
 
     - name: Upload MSI Artifact to Release
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: "Scripture.Installer/bin/x64/Release/ScriptureAutocadPlugin.msi"
         asset_name: "ScriptureAutocadPlugin-${{ env.timestamp }}.msi"
         label: "MSI Installer"
-
+        asset_content_type: "application/octet-stream"
+    
     - name: Upload EXE Artifact to Release
       uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: "Scripture.Installer.Bundle/bin/x64/Release/ScriptureInstaller.exe"
         asset_name: "ScriptureBundleInstaller-${{ env.timestamp }}.exe"
         label: "Bundle Installer"
+        asset_content_type: "application/octet-stream"
+
