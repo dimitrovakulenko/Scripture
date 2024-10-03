@@ -3,6 +3,8 @@ using Azure.AI.OpenAI;
 using Microsoft.Extensions.Configuration;
 using OpenAI;
 using OpenAI.Chat;
+using System.ClientModel;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ScriptureCore
@@ -50,15 +52,32 @@ namespace ScriptureCore
                 Temperature = 0.3f,
             };
 
-            var messages = new ChatMessage[]
+            var messages = new List<ChatMessage>()
             {
                 new SystemChatMessage(GenerateInitialScriptSystemMessage()),
                 new UserChatMessage(prompt),
             };
 
-            var completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
-            var completeAnswer = string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
-            return RemoveCodeFence(completeAnswer);
+            var completeAnswer = new StringBuilder();
+            ClientResult<ChatCompletion> completionsResponse;
+
+            do
+            {
+                completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
+
+                // Add the generated response to the complete answer
+                completeAnswer.Append(
+                    RemoveCodeFence(
+                        string.Join(
+                            "", 
+                            completionsResponse.Value.Content.Select(c => c.Text))));
+
+                // Add the new response to the message list to continue the conversation contextually
+                messages.Add(new AssistantChatMessage(string.Join("", completionsResponse.Value.Content.Select(c => c.Text))));
+            }
+            while (completionsResponse.Value.FinishReason == ChatFinishReason.Length);
+
+            return completeAnswer.ToString();
         }
 
         public async Task<string> TryFixScriptAsync(string script, List<string> errorMessages, bool provideAdditionalMetadata)
@@ -86,9 +105,26 @@ namespace ScriptureCore
                 Temperature = 0.3f,
             };
 
-            var completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
-            var completeAnswer = string.Join("", completionsResponse.Value.Content.Select(c => c.Text));
-            return RemoveCodeFence(completeAnswer);
+            var completeAnswer = new StringBuilder();
+            ClientResult<ChatCompletion> completionsResponse;
+
+            do
+            {
+                completionsResponse = await _initialScriptClient.CompleteChatAsync(messages, options);
+
+                // Add the generated response to the complete answer
+                completeAnswer.Append(
+                    RemoveCodeFence(
+                        string.Join(
+                            "",
+                            completionsResponse.Value.Content.Select(c => c.Text))));
+
+                // Add the new response to the message list to continue the conversation contextually
+                messages.Add(new AssistantChatMessage(string.Join("", completionsResponse.Value.Content.Select(c => c.Text))));
+            }
+            while (completionsResponse.Value.FinishReason == ChatFinishReason.Length);
+
+            return completeAnswer.ToString();
         }
 
         private List<ChatMessage> CollectExtraMessagesForErrors(string script, List<string> errorMessages)

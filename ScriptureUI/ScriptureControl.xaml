@@ -21,18 +21,19 @@
         <!-- TabControl Area -->
         <TabControl x:Name="MainTabControl" Grid.Row="0">
             <!-- Step 1: Script Description -->
-            <TabItem Header="Step 1: Script Description">
+            <TabItem Header="Step 1: Description">
                 <StackPanel Margin="10">
                     <Label Content="Please input description of an action you would like to perform" />
-                    <TextBox x:Name="ScriptDescriptionTextBox" Height="100" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
-                             Text="select all polygons with an area less than 200" />
+                    <TextBox x:Name="ScriptDescriptionTextBox" Height="300" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
+                             Text="select all polygons with an area less than 200" 
+                             TextWrapping="Wrap"/>
                     <Button x:Name="GenerateScriptButton" Content="Generate Script" Margin="0,10,0,0" Click="OnGenerateScriptClick" 
                             IsEnabled="{Binding GeneratingScript, Converter={StaticResource InverseBooleanConverter}}"/>
                 </StackPanel>
             </TabItem>
 
             <!-- Step 2: Script Fine-Tuning -->
-            <TabItem Header="Step 2: Script Fine-Tuning">
+            <TabItem Header="Step 2: Fine-Tuning">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
@@ -51,8 +52,8 @@
                 </Grid>
             </TabItem>
 
-            <!-- Step 3: Execution Step -->
-            <TabItem Header="Step 3: Execution Step"
+            <!-- Step 3: Execution -->
+            <TabItem Header="Step 3: Execution"
                      IsEnabled="{Binding ScriptCompiledWithoutErrors}">
                 <StackPanel Margin="10">
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
