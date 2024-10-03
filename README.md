@@ -1,7 +1,12 @@
 # SCRIPTURE - LLM-Based Automation Plugin for AutoCAD
 
 SCRIPTURE is a powerful automation tool for AutoCAD that allows users to automate their workflows by simply describing the actions to be automated with text. 
+
 This tool is currently a prototype and is designed for research and experimentation.
+
+## Example
+
+![Demo of the Plugin: create random entities](.assets/readme_example_1_create_ents/.gif)
 
 ## How to use it?
 
