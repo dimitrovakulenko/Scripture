@@ -77,7 +77,7 @@ After installation or compilation, you can run the plugin in AutoCAD:
 - In AutoCAD, use the command `NETLOAD`
 - Select `scripture.dll` file from the plugin folder (`C:\Program Files\Scripture Plugin\` in case of full install, binaries folder in case of local build)
 
-### Using the Plugin
+## Using the Plugin
 
 Once the plugin is loaded in AutoCAD, you can use it as follows:
 
