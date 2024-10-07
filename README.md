@@ -97,6 +97,8 @@ Once the plugin is loaded in AutoCAD, you can use it as follows:
    
    Once you've made changes, click "Recompile Script" to verify if the errors are resolved.
 
+## Software Architecture 
+
 ### Software Architecture: Concepts
 
 - Initial script generation: ask LLM to generate script by description, try compile script, if there are errors ask LLM to fix the errors maximum N times
@@ -125,6 +127,6 @@ Scripture.Bundle.Installer project results in exe file that install plugin and .
 
 Implemented as github actions
 
-### License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
